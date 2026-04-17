@@ -299,6 +299,32 @@
             color: #000;
             border-color: #fff;
         }
+
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            z-index: 1000; /* Ensure it's on top of everything */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
@@ -425,6 +451,13 @@
             </ul>
         </section>
 
+        <!-- Toast Notification Container -->
+        <div id="toast-message" class="toast-notification"></div>
+
+    </div>
+
+    <div class="page-footer" style="text-align: center; color: #777; font-size: 0.8rem; padding: 20px; margin-top: 30px; border-top: 1px solid #1a1a1a;">
+        &copy; 2026 DevForge. All rights reserved.
     </div>
 
     <script>
@@ -470,7 +503,7 @@
                 social: {
                     github: document.getElementById('input-github').value,
                     linkedin: document.getElementById('input-linkedin').value
-                ],
+                },
                 projects: [
                     {
                         title: document.getElementById('input-proj1-title').value,
@@ -486,7 +519,22 @@
             };
 
             localStorage.setItem('devProfile', JSON.stringify(profileData));
-            alert('Profile saved and published to the marketplace!');
+            showToast('Profile saved and published to the marketplace!');
+        }
+
+        // Toast Notification Function
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast-message');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.add('show');
+
+                // Hide the toast after a specified duration
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.textContent = ''; // Clear text after fading out
+                }, duration);
+            }
         }
 
         function loadProfile() {

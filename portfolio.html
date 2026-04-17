@@ -88,6 +88,34 @@
         .project-card p { color: #888; font-size: 0.9rem; line-height: 1.6; }
         .project-card a { color: #fff; text-decoration: none; border-bottom: 1px dashed #777; font-size: 0.85rem; }
     </style>
+
+    <style>
+        /* Adding responsive styles here for clarity */
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+            .portfolio-header {
+                padding: 60px 20px;
+            }
+            .portfolio-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .page-footer {
+            background-color: #0d0d0d;
+            color: #777;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            border-top: 1px solid #1a1a1a;
+            margin-top: 60px;
+        }
+
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -107,34 +135,10 @@
         <h1 id="port-name">Alex Doe</h1>
         <p class="role" id="port-role">Frontend Architect</p>
             <div class="social-links">
-                <a href="#" id="port-github" target="_blank" rel="noopener noreferrer" style="display: none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 3c-.95.33-3.6 1.42-3.6 1.42A7.05 7.05 0 0 0 12 5.67a7.05 7.05 0 0 0-3.31-.72S6.35 3.33 5.41 3a5.07 5.07 0 0 0-.09 1.77A5.44 5.44 0 0 0 2 10.37c0 5.42 3.3 6.61 6.44 7a3.37 3.37 0 0 0 .94 2.61V22"></path></svg>
-                </a>
-                <a href="#" id="port-linkedin" target="_blank" rel="noopener noreferrer" style="display: none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                </a>
+                <a href="#" id="port-github" target="_blank" rel="noopener noreferrer" style="display: none;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 3c-.95.33-3.6 1.42-3.6 1.42A7.05 7.05 0 0 0 12 5.67a7.05 7.05 0 0 0-3.31-.72S6.35 3.33 5.41 3a5.07 5.07 0 0 0-.09 1.77A5.44 5.44 0 0 0 2 10.37c0 5.42 3.3 6.61 6.44 7a3.37 3.37 0 0 0 .94 2.61V22"></path></svg></a>
+                <a href="#" id="port-linkedin" target="_blank" rel="noopener noreferrer" style="display: none;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
             </div>
     </header>
-
-    <style>
-        .social-links {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        .social-links a {
-            color: #888;
-            transition: color 0.3s;
-        }
-        .social-links a:hover {
-            color: #fff;
-        }
-        .social-links svg {
-            width: 28px;
-            height: 28px;
-        }
-    </style>
 
     <main class="portfolio-content">
         <h2 class="section-title">Core Competencies</h2>
@@ -292,4 +296,6 @@
         });
     </script>
 </body>
+<footer class="page-footer">
+    &copy; 202
 </html>
