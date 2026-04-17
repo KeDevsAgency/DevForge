@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Portfolio | DevForge</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'SF Mono', 'Courier New', Courier, monospace;
+        }
+        .navbar {
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5,5,5,0.9);
+            border-bottom: 1px solid #222;
+        }
+        .nav-logo svg { width: 28px; height: 28px; }
+        .nav-links a { color: #aaa; text-decoration: none; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; transition: color 0.3s; }
+        .nav-links a:hover { color: #fff; }
+        
+        .portfolio-header {
+            text-align: center;
+            padding: 80px 20px;
+            background: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 70%);
+        }
+        .portfolio-header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid #444;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .portfolio-header h1 { margin: 0 0 10px 0; font-size: 2.5rem; font-weight: normal; letter-spacing: 2px; }
+        .portfolio-header .role { color: #888; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px; }
+        
+        .portfolio-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+        .skills-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #222;
+            padding: 25px;
+            border-radius: 4px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: #555;
+        }
+        .project-card h3 { margin: 0 0 15px 0; font-weight: normal; font-size: 1.2rem; }
+        .project-card p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+        .project-card a { color: #fff; text-decoration: none; border-bottom: 1px dashed #777; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="10 6 4 12 10 18"></polyline>
+                <polyline points="14 6 20 12 14 18"></polyline>
+            </svg>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">← Back to Marketplace</a>
+        </div>
+    </nav>
+
+    <header class="portfolio-header">
+        <img src="https://i.pravatar.cc/150?img=1" alt="Developer Avatar" id="port-image">
+        <h1 id="port-name">Alex Doe</h1>
+        <p class="role" id="port-role">Frontend Architect</p>
+            <div class="social-links">
+                <a href="#" id="port-github" target="_blank" rel="noopener noreferrer" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 3c-.95.33-3.6 1.42-3.6 1.42A7.05 7.05 0 0 0 12 5.67a7.05 7.05 0 0 0-3.31-.72S6.35 3.33 5.41 3a5.07 5.07 0 0 0-.09 1.77A5.44 5.44 0 0 0 2 10.37c0 5.42 3.3 6.61 6.44 7a3.37 3.37 0 0 0 .94 2.61V22"></path></svg>
+                </a>
+                <a href="#" id="port-linkedin" target="_blank" rel="noopener noreferrer" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                </a>
+            </div>
+    </header>
+
+    <style>
+        .social-links {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .social-links a {
+            color: #888;
+            transition: color 0.3s;
+        }
+        .social-links a:hover {
+            color: #fff;
+        }
+        .social-links svg {
+            width: 28px;
+            height: 28px;
+        }
+    </style>
+
+    <main class="portfolio-content">
+        <h2 class="section-title">Core Competencies</h2>
+        <div class="skills-container" id="port-skills">
+            <div class="skill-tag">React & Next.js</div>
+            <div class="skill-tag">TypeScript</div>
+            <div class="skill-tag">UI/UX Design</div>
+        </div>
+
+        <h2 class="section-title">Featured Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>E-Commerce Platform</h3>
+                <p>A scalable, high-performance storefront built with Next.js and Stripe integration. Handles 10k+ concurrent users.</p>
+                <a href="#">View Case Study</a>
+            </div>
+            <div class="project-card">
+                <h3>Fintech Dashboard</h3>
+                <p>Real-time data visualization tool for crypto trading, utilizing WebSockets and D3.js for charting.</p>
+                <a href="#">View Case Study</a>
+            </div>
+            <div class="project-card">
+                <h3>Design System</h3>
+                <p>A comprehensive, accessible component library published to npm and used across 5 enterprise applications.</p>
+                <a href="#">View Case Study</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Automatically load dynamic developer data if available
+        const hardcodedDevs = {
+            'alex-doe': {
+                name: 'Alex Doe',
+                role: 'Frontend Architect',
+                image: 'https://i.pravatar.cc/150?img=1',
+                skills: ['React & Next.js', 'TypeScript', 'UI/UX Design'],
+                social: { github: '#', linkedin: '#' },
+                projects: [
+                    { title: 'E-Commerce Platform', desc: 'A scalable, high-performance storefront built with Next.js and Stripe integration. Handles 10k+ concurrent users.', link: '#' },
+                    { title: 'Fintech Dashboard', desc: 'Real-time data visualization tool for crypto trading, utilizing WebSockets and D3.js for charting.', link: '#' },
+                    { title: 'Design System', desc: 'A comprehensive, accessible component library published to npm and used across 5 enterprise applications.', link: '#' }
+                ]
+            },
+            'jordan-smith': {
+                name: 'Jordan Smith',
+                role: 'Backend Specialist',
+                image: 'https://i.pravatar.cc/150?img=2',
+                skills: ['Node.js & Express', 'PostgreSQL / MongoDB', 'Docker & K8s'],
+                social: { github: '#', linkedin: '#' },
+                projects: [
+                    { title: 'Microservices API Gateway', desc: 'Designed and implemented a resilient API gateway for various microservices using Node.js and GraphQL.', link: '#' },
+                    { title: 'Real-time Analytics Engine', desc: 'Built a high-throughput data processing pipeline with Kafka and Apache Flink for real-time analytics.', link: '#' },
+                    { title: 'CI/CD Automation Suite', desc: 'Developed automated deployment pipelines for multiple services, reducing deployment time by 80%.', link: '#' }
+                ]
+            },
+            'taylor-jones': {
+                name: 'Taylor Jones',
+                role: 'Full-Stack Engineer',
+                image: 'https://i.pravatar.cc/150?img=3',
+                skills: ['Python (Django)', 'Vue.js', 'AWS Infrastructure'],
+                social: { github: '#', linkedin: '#' },
+                projects: [
+                    { title: 'AI-Powered Recommendation System', desc: 'Developed a personalized product recommendation engine using Python, TensorFlow.', link: '#' }
+                ]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Get the developer ID from the URL (e.g. ?id=alex-doe)
+            const urlParams = new URLSearchParams(window.location.search);
+            const devId = urlParams.get('id');
+            
+            let profileData = null;
+
+            // 2. Decide which profile data to load
+            if (devId === 'my-profile') {
+                // Load from localStorage if viewing your own customized profile
+                const savedProfile = localStorage.getItem('devProfile');
+                if (savedProfile) {
+                    profileData = JSON.parse(savedProfile);
+                }
+            } else if (devId && hardcodedDevs[devId]) {
+                // Otherwise, load the hardcoded demo data
+                profileData = hardcodedDevs[devId];
+            }
+
+            // 3. Populate the page if we successfully found data
+            if (profileData) {
+                if(profileData.name) document.getElementById('port-name').textContent = profileData.name;
+                if(profileData.role) document.getElementById('port-role').textContent = profileData.role;
+                if(profileData.image) document.getElementById('port-image').src = profileData.image;
+                
+                if(profileData.skills && profileData.skills.length > 0) {
+                    const skillsContainer = document.getElementById('port-skills');
+                    skillsContainer.innerHTML = ''; // Clear default tags
+                    profileData.skills.forEach(skill => {
+                        if(skill && skill.trim() !== '') {
+                            const tag = document.createElement('div');
+                            tag.className = 'skill-tag';
+                            tag.textContent = skill;
+                            skillsContainer.appendChild(tag);
+                        }
+                    });
+                }
+
+                // Populate social links
+                const githubLink = document.getElementById('port-github');
+                const linkedinLink = document.getElementById('port-linkedin');
+                if (profileData.social && profileData.social.github) {
+                    githubLink.href = profileData.social.github;
+                    githubLink.style.display = 'inline-block';
+                } else githubLink.style.display = 'none';
+
+                if (profileData.social && profileData.social.linkedin) {
+                    linkedinLink.href = profileData.social.linkedin;
+                    linkedinLink.style.display = 'inline-block';
+                } else linkedinLink.style.display = 'none';
+                
+                // Load and inject custom projects
+                if (profileData.projects && profileData.projects.length > 0) {
+                    const projectsContainer = document.querySelector('.projects-grid');
+                    
+                    // Verify we have at least one project with a title before overwriting
+                    const hasValidProjects = profileData.projects.some(p => p.title && p.title.trim() !== '');
+                    
+                    if (hasValidProjects) {
+                        projectsContainer.innerHTML = ''; // Clear default demo projects
+                        
+                        profileData.projects.forEach(proj => {
+                            if (proj.title && proj.title.trim() !== '') {
+                                const card = document.createElement('div');
+                                card.className = 'project-card';
+                                
+                                const title = document.createElement('h3');
+                                title.textContent = proj.title;
+                                card.appendChild(title);
+                                
+                                const desc = document.createElement('p');
+                                desc.textContent = proj.desc || '';
+                                card.appendChild(desc);
+                                
+                                const link = document.createElement('a');
+                                link.href = proj.link || '#';
+                                link.textContent = 'View Case Study';
+                                link.target = '_blank';
+                                card.appendChild(link);
+                                
+                                projectsContainer.appendChild(card);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

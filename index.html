@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevForge | Developer Marketplace</title>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Base Reset & Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'SF Mono', 'Courier New', Courier, monospace;
+            transition: background 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateY(0);
+            }
+        }
+
+        /* Initial landing page state text */
+        .landing-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            transition: opacity 0.5s;
+            width: 100%;
+            max-width: 650px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            opacity: 0; /* Start hidden for animation */
+            animation: fadeInUp 1s ease 0.5s forwards;
+        }
+        .landing-text h1 {
+            font-weight: normal;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+        }
+        .landing-text p {
+            color: #aaa;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        body.auth-mode .landing-text {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .main-view {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden; /* Contains the lamp and auth form */
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 40px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100; /* Stays above the lamp */
+            gap: 40px;
+            background: linear-gradient(to bottom, rgba(5,5,5,0.8), rgba(5,5,5,0));
+            transition: background 0.3s;
+        }
+
+        .nav-logo svg {
+            display: block;
+            width: 28px;
+            height: 28px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* The Pull Cord System */
+        .lamp-container {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            z-index: 10;
+            display: none;
+        }
+
+        body.auth-mode .lamp-container {
+            display: block;
+        }
+
+        /* Physical Lamp Symbol */
+        .wall-mount {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            width: 15px;
+            height: 60px;
+            background-color: #222;
+            border-radius: 0 5px 5px 0;
+            border: 2px solid #333;
+            border-left: none;
+        }
+
+        .lamp-arm {
+            position: absolute;
+            top: -5px;
+            left: 15px;
+            width: 80px;
+            height: 10px;
+            background-color: #222;
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #333;
+        }
+
+        .lamp-shade {
+            position: absolute;
+            top: -25px;
+            left: 75px;
+            width: 60px;
+            height: 40px;
+            background-color: #1a1a1a;
+            border: 2px solid #333;
+            border-bottom: none;
+            border-radius: 30px 30px 0 0;
+            z-index: 11;
+        }
+        .lamp-shade::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -5px;
+            width: 70px;
+            height: 10px;
+            background-color: #222;
+            border-radius: 5px;
+        }
+
+        .cord {
+            position: absolute;
+            top: 15px;
+            left: 104px;
+            width: 2px;
+            height: 150px;
+            background-color: #444;
+            cursor: grab;
+            /* Bouncy transition for when the cord is released */
+            transition: height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cord:active {
+            cursor: grabbing;
+        }
+
+        /* The little handle at the end of the string */
+        .handle {
+            width: 12px;
+            height: 24px;
+            background-color: #666;
+            border-radius: 10px;
+            position: absolute;
+            bottom: -12px;
+            left: -5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Revealed State (When the light is "Turned On") */
+        body.revealed {
+            /* Creates a subtle spotlight effect in the dark room */
+            background: radial-gradient(circle at 105px 50%, #1a1a1a 0%, #050505 80%);
+        }
+
+        .content-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100vh;
+            padding-right: 15%;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(30px);
+            transition: all 1s ease;
+        }
+
+        body.revealed .content-container {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+        }
+
+        /* Minimalist Form Styles */
+        .form-box {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            padding: 50px 40px;
+            border-radius: 4px;
+            border: 1px solid #222;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            width: 320px;
+            text-align: center;
+        }
+
+        .form-box h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: normal;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 5px;
+            margin: 10px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #444;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-bottom-color 0.3s;
+        }
+
+        input:focus {
+            border-bottom-color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background: #fff;
+            color: #000;
+            border: none;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #ccc;
+            transform: translateY(-2px);
+        }
+
+        .toggle-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 25px;
+        }
+
+        .toggle-text a {
+            color: #aaa;
+            text-decoration: none;
+            border-bottom: 1px dashed #aaa;
+            padding-bottom: 2px;
+            transition: color 0.3s;
+        }
+
+        .toggle-text a:hover {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        /* Tooltip to instruct the user */
+        .instruction {
+            position: absolute;
+            top: calc(50% + 190px);
+            left: 105px;
+            transform: translateX(-50%);
+            color: #444;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            transition: opacity 0.5s;
+        }
+
+        body.revealed .instruction {
+            opacity: 0;
+        }
+        
+        body:not(.auth-mode) .instruction {
+            display: none;
+        }
+
+        /* Below-the-fold sections */
+        .page-section {
+            padding: 100px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-section h2 {
+            font-size: 2rem;
+            font-weight: normal;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #fff;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .dev-card {
+            background-color: transparent;
+            height: 380px;
+            perspective: 1000px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .dev-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+
+        .dev-card.is-flipped .dev-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .dev-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .dev-card:hover .dev-card-inner {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+        }
+
+        .dev-card-front,
+        .dev-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            box-sizing: border-box;
+            border-radius: 4px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid #222;
+        }
+
+        .dev-card-back {
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .click-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        .dev-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        .dev-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+            font-weight: normal;
+            color: #fff;
+        }
+
+        .dev-card .role {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .dev-card-back .skills-title {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .dev-card-back ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 25px 0;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .dev-card-back ul li {
+            margin-bottom: 8px;
+        }
+
+        .dev-card .portfolio-btn {
+            display: inline-block;
+            color: #ccc;
+            text-decoration: none;
+            border: 1px solid #444;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .dev-card .portfolio-btn:hover {
+            background-color: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <!-- Minimalist Developer SVG Logo -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="10 6 4 12 10 18"></polyline>
+                <polyline points="14 6 20 12 14 18"></polyline>
+            </svg>
+        </div>
+        <div class="nav-links">
+            <a href="#" id="nav-home">Home</a>
+            <a href="#" id="nav-login">Login</a>
+            <a href="#" id="nav-register">Register</a>
+            <a href="#about">About</a>
+            <a href="#team">Our Team</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <div class="main-view">
+        <!-- Landing Page Content -->
+        <div class="landing-text">
+            <h1>DevForge</h1>
+            <p>A curated marketplace of elite software engineering talent.</p>
+            <p>
+                Explore our roster of developers, architects, and creators ready to build your next scalable, high-performance digital solution. 
+                Clients can discover the minds behind the code on our <a href="#team" style="color: #fff; text-decoration: none; border-bottom: 1px dashed #777;">Our Team</a> page.<br><br>
+                <span style="font-size: 0.85rem; color: #777;">Developers: Select Login to manage your portfolio workspace.</span>
+            </p>
+        </div>
+
+        <!-- Hanging Lamp Cord -->
+        <div class="lamp-container">
+            <div class="wall-mount"></div>
+            <div class="lamp-arm"></div>
+            <div class="lamp-shade"></div>
+            <div class="cord" id="cord">
+                <div class="handle"></div>
+            </div>
+        </div>
+        
+        <div class="instruction">Pull to access</div>
+
+        <!-- Hidden Authentication Form -->
+        <div class="content-container" id="content">
+            <div class="form-box">
+                <h2 id="form-title">System Login</h2>
+                <form id="auth-form">
+                    <input type="text" placeholder="Developer ID / Email" required>
+                    <input type="password" placeholder="Passphrase" required>
+                    <button type="submit" id="submit-btn">Initialize</button>
+                </form>
+                <p class="toggle-text">
+                    <span id="toggle-prefix">Need access?</span> 
+                    <a href="#" id="toggle-form">Register here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- "Our Team" Section -->
+    <section id="team" class="page-section">
+        <h2>Our Developers</h2>
+        <div class="team-grid">
+            <!-- Developer Card 1 -->
+            <div class="dev-card">
+                <div class="dev-card-inner">
+                    <div class="dev-card-front">
+                        <img src="https://i.pravatar.cc/150?img=1" alt="Developer Photo">
+                        <h3>Alex Doe</h3>
+                        <p class="role">Frontend Architect</p>
+                        <p class="click-info">Click for details</p>
+                    </div>
+                    <div class="dev-card-back">
+                        <h3>Alex Doe</h3>
+                        <p class="skills-title">Core Skills</p>
+                        <ul>
+                            <li>React & Next.js</li>
+                            <li>TypeScript</li>
+                            <li>UI/UX Design</li>
+                        </ul>
+                        <a href="portfolio.html?id=alex-doe" target="_blank" class="portfolio-btn">View Full Portfolio</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Developer Card 2 -->
+            <div class="dev-card">
+                <div class="dev-card-inner">
+                    <div class="dev-card-front">
+                        <img src="https://i.pravatar.cc/150?img=2" alt="Developer Photo">
+                        <h3>Jordan Smith</h3>
+                        <p class="role">Backend Specialist</p>
+                        <p class="click-info">Click for details</p>
+                    </div>
+                    <div class="dev-card-back">
+                        <h3>Jordan Smith</h3>
+                        <p class="skills-title">Core Skills</p>
+                        <ul>
+                            <li>Node.js & Express</li>
+                            <li>PostgreSQL / MongoDB</li>
+                            <li>Docker & K8s</li>
+                        </ul>
+                        <a href="portfolio.html?id=jordan-smith" target="_blank" class="portfolio-btn">View Full Portfolio</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Developer Card 3 -->
+            <div class="dev-card">
+                <div class="dev-card-inner">
+                    <div class="dev-card-front">
+                        <img src="https://i.pravatar.cc/150?img=3" alt="Developer Photo">
+                        <h3>Taylor Jones</h3>
+                        <p class="role">Full-Stack Engineer</p>
+                        <p class="click-info">Click for details</p>
+                    </div>
+                    <div class="dev-card-back">
+                        <h3>Taylor Jones</h3>
+                        <p class="skills-title">Core Skills</p>
+                        <ul>
+                            <li>Python (Django)</li>
+                            <li>Vue.js</li>
+                            <li>AWS Infrastructure</li>
+                        </ul>
+                        <a href="portfolio.html?id=taylor-jones" target="_blank" class="portfolio-btn">View Full Portfolio</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const cord = document.getElementById('cord');
+        const formTitle = document.getElementById('form-title');
+        const toggleFormBtn = document.getElementById('toggle-form');
+        const togglePrefix = document.getElementById('toggle-prefix');
+        const submitBtn = document.getElementById('submit-btn');
+        const navLogin = document.getElementById('nav-login');
+        const navRegister = document.getElementById('nav-register');
+        const navHome = document.getElementById('nav-home');
+        const teamLinks = document.querySelectorAll('a[href="#team"]');
+        
+        // Physics and state variables
+        let isDragging = false;
+        let startY = 0;
+        const baseHeight = 150;
+        const pullThreshold = 70; // How many pixels to pull down before the light turns on
+        let isRevealed = false;
+        let isLogin = true;
+
+        // Interaction functions
+        function startDrag(e) {
+            isDragging = true;
+            // Support both mouse and touch events
+            startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            cord.style.transition = 'none'; // Disable transition for a smooth drag
+        }
+
+        function moveDrag(e) {
+            if (!isDragging) return;
+            
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const deltaY = clientY - startY;
+            
+            // Allow dragging downwards up to a max limit
+            if (deltaY > 0 && deltaY < 120) {
+                cord.style.height = `${baseHeight + deltaY}px`;
+                
+                // If pulled past the threshold, turn on the light
+                if (deltaY > pullThreshold && !isRevealed) {
+                    turnOnLight();
+                }
+            }
+        }
+
+        function endDrag() {
+            if (isDragging) {
+                isDragging = false;
+                // Re-enable bouncy transition and snap back to original height
+                cord.style.transition = 'height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                cord.style.height = `${baseHeight}px`;
+            }
+        }
+
+        function turnOnLight() {
+            isRevealed = true;
+            document.body.classList.add('revealed');
+            // Optional: You could add a subtle "click" sound effect here!
+        }
+
+        // Event Listeners for dragging the cord (Mouse & Touch)
+        cord.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('mouseup', endDrag);
+
+        cord.addEventListener('touchstart', startDrag);
+        window.addEventListener('touchmove', moveDrag);
+        window.addEventListener('touchend', endDrag);
+
+        // Toggle logic to switch between Login and Register views
+        function setFormState(toLogin) {
+            isLogin = toLogin;
+            if (isLogin) {
+                formTitle.textContent = 'System Login';
+                submitBtn.textContent = 'Initialize';
+                togglePrefix.textContent = 'Need access?';
+                toggleFormBtn.textContent = 'Register here';
+            } else {
+                formTitle.textContent = 'Developer Registration';
+                submitBtn.textContent = 'Request Access';
+                togglePrefix.textContent = 'Already authorized?';
+                toggleFormBtn.textContent = 'Login here';
+            }
+        }
+
+        toggleFormBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setFormState(!isLogin);
+        });
+
+        navLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            setFormState(true);
+            document.body.classList.add('auth-mode');
+            if (isRevealed) {
+                document.body.classList.remove('revealed');
+                isRevealed = false;
+            }
+        });
+
+        navRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            setFormState(false);
+            document.body.classList.add('auth-mode');
+            if (isRevealed) {
+                document.body.classList.remove('revealed');
+                isRevealed = false;
+            }
+        });
+
+        navHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.body.classList.remove('auth-mode');
+            document.body.classList.remove('revealed');
+            isRevealed = false;
+        });
+
+        // Make sure clicking any link to the team section also resets the auth view
+        teamLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                document.body.classList.remove('auth-mode', 'revealed');
+                isRevealed = false;
+            });
+        });
+
+        // Prevent actual form submission for this demo
+        document.getElementById('auth-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Redirect the developer to their customization dashboard
+            window.location.href = 'dashboard.html';
+        });
+
+        // Add flip animation to developer cards
+        const devCards = document.querySelectorAll('.dev-card');
+        devCards.forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('is-flipped');
+            });
+        });
+
+        /**
+         * This function runs when the marketplace page loads. It checks localStorage
+         * for a developer profile and updates the first card if data is found.
+         */
+        function populateMarketplace() {
+            const savedProfile = localStorage.getItem('devProfile');
+            if (savedProfile) {
+                const profileData = JSON.parse(savedProfile);
+
+                // Select the first developer card in the grid to update
+                const firstCard = document.querySelector('.team-grid .dev-card');
+                if (firstCard) {
+                    // Update front of the card
+                    firstCard.querySelector('.dev-card-front img').src = profileData.image || 'https://i.pravatar.cc/150?img=1';
+                    firstCard.querySelector('.dev-card-front h3').textContent = profileData.name || 'Alex Doe';
+                    firstCard.querySelector('.dev-card-front .role').textContent = profileData.role || 'Frontend Architect';
+
+                    // Update back of the card
+                    firstCard.querySelector('.dev-card-back h3').textContent = profileData.name || 'My Profile'; // Label it as "My Profile"
+                    const skillsList = firstCard.querySelectorAll('.dev-card-back ul li');
+                    if (skillsList.length === 3 && profileData.skills) {
+                        skillsList[0].textContent = profileData.skills[0] || 'React & Next.js';
+                        skillsList[1].textContent = profileData.skills[1] || 'TypeScript';
+                        skillsList[2].textContent = profileData.skills[2] || 'UI/UX Design';
+                    }
+                }
+                // Update the "View Full Portfolio" link for the customized card
+                firstCard.querySelector('.portfolio-btn').href = 'portfolio.html?id=my-profile';
+            }
+        }
+
+        // Run the population function when the page is ready
+        document.addEventListener('DOMContentLoaded', populateMarketplace);
+    </script>
+</body>
+</html>
