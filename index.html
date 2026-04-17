@@ -491,6 +491,21 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.8); /* Shadow to stand out against any background */
         }
 
+        /* Mobile Menu Overlay */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9997; /* Below nav links (9998) and toggle (9999) */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
         /* Mobile Styles */
         @media (max-width: 800px) {
             .navbar {
@@ -511,6 +526,7 @@
                 justify-content: center;
                 align-items: center;
                 gap: 30px;
+                z-index: 9998; /* Ensures the menu sits above the overlay */
                 
                 /* Hidden state for the mobile menu */
                 opacity: 0;
@@ -526,6 +542,11 @@
                 visibility: visible;
                 pointer-events: auto;
                 transform: translateX(0); /* Slide into view */
+            }
+
+            body.mobile-menu-open .menu-overlay {
+                opacity: 1;
+                visibility: visible;
             }
             
             .nav-links a {
@@ -662,6 +683,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Dark Overlay for Mobile Menu -->
+    <div class="menu-overlay" id="menuOverlay"></div>
 
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -850,9 +874,15 @@
         // --- Mobile Navigation Toggle ---
         const menuToggle = document.querySelector('.menu-toggle');
         const mainNavLinks = document.querySelector('.nav-links');
+        const menuOverlay = document.getElementById('menuOverlay');
 
         menuToggle.addEventListener('click', () => {
             document.body.classList.toggle('mobile-menu-open');
+        });
+
+        // Close mobile menu when the dark overlay is clicked
+        menuOverlay.addEventListener('click', () => {
+            document.body.classList.remove('mobile-menu-open');
         });
 
         // Close mobile menu when a link is clicked (for single-page navigation)
