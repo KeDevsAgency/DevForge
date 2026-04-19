@@ -7,6 +7,8 @@
     <style>
         html {
             scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #333 #050505;
         }
 
         /* Base Reset & Styling */
@@ -17,6 +19,21 @@
             color: #fff;
             font-family: 'SF Mono', 'Courier New', Courier, monospace;
             transition: background 0.8s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         @keyframes fadeInUp {
@@ -78,7 +95,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100; /* Stays above the lamp */
+            z-index: 9999; /* Must be higher than the mobile overlay (9997) to prevent blurring */
             gap: 40px;
             background: linear-gradient(to bottom, rgba(5,5,5,0.8), rgba(5,5,5,0));
             transition: background 0.3s;
@@ -213,6 +230,8 @@
             pointer-events: none;
             transform: translateY(30px);
             transition: all 1s ease;
+            position: relative;
+            z-index: 20; /* Ensures the form sits above the lamp cord */
         }
 
         body.revealed .content-container {
@@ -473,7 +492,9 @@
             background: none;
             border: none;
             cursor: pointer;
-            padding: 15px; /* Larger clickable area */
+            width: 50px;
+            height: 50px;
+            padding: 0;
             z-index: 9999; /* Absolute top layer */
             position: absolute;
             right: 20px;
@@ -483,13 +504,18 @@
 
         .menu-toggle span {
             display: block;
+            position: absolute;
+            left: 9px;
             width: 32px; /* Wider */
             height: 3px; /* Thicker */
             background-color: #fff;
-            margin: 6px 0;
             transition: all 0.3s ease-in-out;
             box-shadow: 0 1px 3px rgba(0,0,0,0.8); /* Shadow to stand out against any background */
+            border-radius: 2px;
         }
+        .menu-toggle span:nth-child(1) { top: 15px; }
+        .menu-toggle span:nth-child(2) { top: 24px; }
+        .menu-toggle span:nth-child(3) { top: 33px; }
 
         /* Mobile Menu Overlay */
         .menu-overlay {
@@ -521,7 +547,6 @@
                 width: 100%;
                 height: 100vh;
                 background: rgba(5, 5, 5, 0.98);
-                backdrop-filter: blur(5px);
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
@@ -532,8 +557,9 @@
                 opacity: 0;
                 visibility: hidden;
                 pointer-events: none;
-                transform: translateX(-100%); /* Start off-screen to the left */
-                transition: transform 0.4s ease-out, visibility 0.4s ease 0.4s; /* Slide out, then hide visibility */
+                transform: translateY(-20px);
+                transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s ease;
+                backface-visibility: hidden; /* Forces hardware acceleration for razor-sharp text */
             }
             
             body.mobile-menu-open .nav-links {
@@ -541,7 +567,7 @@
                 opacity: 1;
                 visibility: visible;
                 pointer-events: auto;
-                transform: translateX(0); /* Slide into view */
+                transform: translateY(0);
             }
 
             body.mobile-menu-open .menu-overlay {
@@ -555,13 +581,21 @@
 
             /* Animate hamburger to a close 'X' icon for better UX */
             body.mobile-menu-open .menu-toggle span:nth-child(1) {
-                transform: translateY(9px) rotate(45deg);
+                top: 24px;
+                transform: rotate(45deg);
             }
             body.mobile-menu-open .menu-toggle span:nth-child(2) {
                 opacity: 0;
+                transform: scaleX(0);
             }
             body.mobile-menu-open .menu-toggle span:nth-child(3) {
-                transform: translateY(-9px) rotate(-45deg);
+                top: 24px;
+                transform: rotate(-45deg);
+            }
+
+            .content-container {
+                justify-content: center; /* Center the form on mobile */
+                padding-right: 0; /* Remove the desktop offset */
             }
         }
 
@@ -698,11 +732,11 @@
         </div>
         <div class="nav-links">
             <a href="#" id="nav-home">Home</a>
-            <a href="#" id="nav-login">Login</a>
-            <a href="#" id="nav-register">Register</a>
+            <a href="#" id="nav-login">Developer Login</a>
             <a href="#about">About</a>
             <a href="#team">Our Team</a>
             <a href="#contact">Contact</a>
+            <a href="#" id="nav-logout">Logout</a>
         </div>
         <button class="menu-toggle" aria-label="Toggle navigation">
             <span></span>
@@ -738,16 +772,12 @@
         <!-- Hidden Authentication Form -->
         <div class="content-container" id="content">
             <div class="form-box">
-                <h2 id="form-title">System Login</h2>
+                <h2 id="form-title">Developer Login</h2>
                 <form id="auth-form">
-                    <input type="text" placeholder="Developer ID / Email" required>
-                    <input type="password" placeholder="Passphrase" required>
-                    <button type="submit" id="submit-btn">Initialize</button>
+                    <input type="email" id="input-email-auth" placeholder="Email" required>
+                    <input type="password" id="input-pass-auth" placeholder="Passphrase" required>
+                    <button type="submit" id="submit-btn">Login to Dashboard</button>
                 </form>
-                <p class="toggle-text">
-                    <span id="toggle-prefix">Need access?</span> 
-                    <a href="#" id="toggle-form">Register here</a>
-                </p>
             </div>
         </div>
     </div>
@@ -894,21 +924,23 @@
 
         const cord = document.getElementById('cord');
         const formTitle = document.getElementById('form-title');
-        const toggleFormBtn = document.getElementById('toggle-form');
-        const togglePrefix = document.getElementById('toggle-prefix');
         const submitBtn = document.getElementById('submit-btn');
         const navLogin = document.getElementById('nav-login');
-        const navRegister = document.getElementById('nav-register');
         const navHome = document.getElementById('nav-home');
+        const navLogout = document.getElementById('nav-logout');
         const teamLinks = document.querySelectorAll('a[href="#team"]');
         
+        // --- Site Access Gatekeeper ---
+        if (sessionStorage.getItem('siteAccess') !== 'granted') {
+            window.location.href = 'welcome.html';
+        }
+
         // Physics and state variables
         let isDragging = false;
         let startY = 0;
         const baseHeight = 150;
         const pullThreshold = 70; // How many pixels to pull down before the light turns on
         let isRevealed = false;
-        let isLogin = true;
 
         // Interaction functions
         function startDrag(e) {
@@ -959,40 +991,8 @@
         window.addEventListener('touchmove', moveDrag);
         window.addEventListener('touchend', endDrag);
 
-        // Toggle logic to switch between Login and Register views
-        function setFormState(toLogin) {
-            isLogin = toLogin;
-            if (isLogin) {
-                formTitle.textContent = 'System Login';
-                submitBtn.textContent = 'Initialize';
-                togglePrefix.textContent = 'Need access?';
-                toggleFormBtn.textContent = 'Register here';
-            } else {
-                formTitle.textContent = 'Developer Registration';
-                submitBtn.textContent = 'Request Access';
-                togglePrefix.textContent = 'Already authorized?';
-                toggleFormBtn.textContent = 'Login here';
-            }
-        }
-
-        toggleFormBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            setFormState(!isLogin);
-        });
-
         navLogin.addEventListener('click', (e) => {
             e.preventDefault();
-            setFormState(true);
-            document.body.classList.add('auth-mode');
-            if (isRevealed) {
-                document.body.classList.remove('revealed');
-                isRevealed = false;
-            }
-        });
-
-        navRegister.addEventListener('click', (e) => {
-            e.preventDefault();
-            setFormState(false);
             document.body.classList.add('auth-mode');
             if (isRevealed) {
                 document.body.classList.remove('revealed');
@@ -1015,50 +1015,79 @@
             });
         });
 
+        // --- Client / Visitor Logout ---
+        navLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('siteAccess');
+            sessionStorage.removeItem('currentClient');
+            window.location.href = 'welcome.html';
+        });
+
         // Prevent actual form submission for this demo
         document.getElementById('auth-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            // Redirect the developer to their customization dashboard
-            window.location.href = 'dashboard.html';
-        });
+            
+            const email = document.getElementById('input-email-auth').value;
+            const pass = document.getElementById('input-pass-auth').value;
 
-        // Add flip animation to developer cards
-        const devCards = document.querySelectorAll('.dev-card');
-        devCards.forEach(card => {
-            card.addEventListener('click', () => {
-                card.classList.toggle('is-flipped');
-            });
+            // Get or initialize our "database" from localStorage
+            let profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+
+            const user = profiles.find(p => p.email === email);
+
+            if (user && user.password === pass) {
+                sessionStorage.setItem('currentUser', user.email);
+                window.location.href = 'dashboard.html';
+            } else {
+                alert('Invalid Developer Credentials.');
+            }
         });
 
         /**
          * This function runs when the marketplace page loads. It checks localStorage
-         * for a developer profile and updates the first card if data is found.
+         * for all developer profiles and dynamically builds the developer cards.
          */
         function populateMarketplace() {
-            const savedProfile = localStorage.getItem('devProfile');
-            if (savedProfile) {
-                const profileData = JSON.parse(savedProfile);
+            const profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+            const teamGrid = document.querySelector('.team-grid');
 
-                // Select the first developer card in the grid to update
-                const firstCard = document.querySelector('.team-grid .dev-card');
-                if (firstCard) {
-                    // Update front of the card
-                    firstCard.querySelector('.dev-card-front img').src = profileData.image || 'https://i.pravatar.cc/150?img=1';
-                    firstCard.querySelector('.dev-card-front h3').textContent = profileData.name || 'Alex Doe';
-                    firstCard.querySelector('.dev-card-front .role').textContent = profileData.role || 'Frontend Architect';
-
-                    // Update back of the card
-                    firstCard.querySelector('.dev-card-back h3').textContent = profileData.name || 'My Profile'; // Label it as "My Profile"
-                    const skillsList = firstCard.querySelectorAll('.dev-card-back ul li');
-                    if (skillsList.length === 3 && profileData.skills) {
-                        skillsList[0].textContent = profileData.skills[0] || 'React & Next.js';
-                        skillsList[1].textContent = profileData.skills[1] || 'TypeScript';
-                        skillsList[2].textContent = profileData.skills[2] || 'UI/UX Design';
-                    }
-                }
-                // Update the "View Full Portfolio" link for the customized card
-                firstCard.querySelector('.portfolio-btn').href = 'portfolio.html?id=my-profile';
+            // If there are registered profiles, build the grid from them
+            if (profiles.length > 0) {
+                teamGrid.innerHTML = ''; // Clear the hardcoded demo cards
+                profiles.forEach(profile => {
+                    const cardHTML = `
+                        <div class="dev-card">
+                            <div class="dev-card-inner">
+                                <div class="dev-card-front">
+                                    <img src="${profile.image || 'https://i.pravatar.cc/150?img=1'}" alt="Developer Photo">
+                                    <h3>${profile.name || 'Developer'}</h3>
+                                    <p class="role">${profile.role || 'Engineer'}</p>
+                                    <p class="click-info">Click for details</p>
+                                </div>
+                                <div class="dev-card-back">
+                                    <h3>${profile.name || 'Developer'}</h3>
+                                    <p class="skills-title">Core Skills</p>
+                                    <ul>
+                                        <li>${profile.skills[0] || ''}</li>
+                                        <li>${profile.skills[1] || ''}</li>
+                                        <li>${profile.skills[2] || ''}</li>
+                                    </ul>
+                                    <a href="portfolio.html?id=${profile.email}" target="_blank" class="portfolio-btn">View Full Portfolio</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    teamGrid.insertAdjacentHTML('beforeend', cardHTML);
+                });
             }
+
+            // Add flip animation to all developer cards (both dynamic and hardcoded)
+            const devCards = document.querySelectorAll('.dev-card');
+            devCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('is-flipped');
+                });
+            });
         }
 
         // Run the population function when the page is ready

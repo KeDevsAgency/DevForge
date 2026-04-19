@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developer Portfolio | DevForge</title>
     <style>
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #333 #050505;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -215,15 +235,17 @@
             let profileData = null;
 
             // 2. Decide which profile data to load
-            if (devId === 'my-profile') {
-                // Load from localStorage if viewing your own customized profile
-                const savedProfile = localStorage.getItem('devProfile');
-                if (savedProfile) {
-                    profileData = JSON.parse(savedProfile);
+            if (devId === 'my-profile') { // For the live preview from the dashboard
+                const currentUserEmail = sessionStorage.getItem('currentUser');
+                if (currentUserEmail) {
+                    const profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+                    profileData = profiles.find(p => p.email === currentUserEmail);
                 }
-            } else if (devId && hardcodedDevs[devId]) {
-                // Otherwise, load the hardcoded demo data
+            } else if (devId && hardcodedDevs[devId]) { // For the hardcoded demo users
                 profileData = hardcodedDevs[devId];
+            } else if (devId) { // For any dynamic user from the marketplace
+                const profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+                profileData = profiles.find(p => p.email === devId);
             }
 
             // 3. Populate the page if we successfully found data
@@ -297,5 +319,5 @@
     </script>
 </body>
 <footer class="page-footer">
-    &copy; 202
+    &copy; 2026 DevForge. All rights reserved.
 </html>

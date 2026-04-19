@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developer Dashboard</title>
     <style>
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #333 #050505;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
         /* Base Styling (Consistent with login page) */
         body {
             background-color: #050505;
@@ -411,7 +431,21 @@
                     <label>Project 2 Link</label>
                     <input type="text" id="input-proj2-link" class="form-control" value="#">
                 </div>
+            </form>
+        </section>
 
+        <!-- Account Settings Form -->
+        <section class="card">
+            <h2>Account Credentials</h2>
+            <form id="account-form">
+                <div class="form-group">
+                    <label>Login Email (Username)</label>
+                    <input type="email" id="input-account-email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="input-account-pass" class="form-control" placeholder="Leave blank to keep current password">
+                </div>
                 <button type="button" class="btn-save">Publish to Marketplace</button>
             </form>
         </section>
@@ -491,7 +525,32 @@
         const saveButton = document.querySelector('.btn-save');
 
         function saveProfile() {
+            const currentUserEmail = sessionStorage.getItem('currentUser');
+            if (!currentUserEmail) {
+                alert('Session expired. Please login again.');
+                return;
+            }
+
+            let profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+            const userIndex = profiles.findIndex(p => p.email === currentUserEmail);
+
+            if (userIndex === -1) {
+                alert('Error: Could not find your profile to save.');
+                return;
+            }
+
+            const newEmail = document.getElementById('input-account-email').value || currentUserEmail;
+            const newPass = document.getElementById('input-account-pass').value;
+
+            // Check if they are trying to use an email that's already taken by someone else
+            if (newEmail !== currentUserEmail && profiles.some(p => p.email === newEmail)) {
+                alert('That email is already in use. Please choose another.');
+                return;
+            }
+
             const profileData = {
+                email: newEmail, 
+                password: newPass || profiles[userIndex].password,
                 name: nameInput.value,
                 role: roleInput.value,
                 image: document.getElementById('out-image').src,
@@ -518,8 +577,17 @@
                 ]
             };
 
-            localStorage.setItem('devProfile', JSON.stringify(profileData));
-            showToast('Profile saved and published to the marketplace!');
+            // Update the profile in the array
+            profiles[userIndex] = profileData;
+            // Save the entire array back to localStorage
+            localStorage.setItem('devForgeProfiles', JSON.stringify(profiles));
+            
+            // Update session in case email changed
+            sessionStorage.setItem('currentUser', newEmail);
+            
+            showToast('Profile and credentials updated!');
+            // Clear the password field after saving
+            document.getElementById('input-account-pass').value = '';
         }
 
         // Toast Notification Function
@@ -538,37 +606,47 @@
         }
 
         function loadProfile() {
-            const savedProfile = localStorage.getItem('devProfile');
-            if (savedProfile) {
-                const profileData = JSON.parse(savedProfile);
+            const currentUserEmail = sessionStorage.getItem('currentUser');
+            if (!currentUserEmail) {
+                alert('No user logged in. Redirecting to login page.');
+                window.location.href = 'index.html';
+                return;
+            }
 
-                // Populate form fields from localStorage
-                nameInput.value = profileData.name || '';
-                roleInput.value = profileData.role || '';
-                if (profileData.skills) {
-                    skill1Input.value = profileData.skills[0] || '';
-                    skill2Input.value = profileData.skills[1] || '';
-                    skill3Input.value = profileData.skills[2] || '';
-                }
-                // Populate social links
-                if (profileData.social) {
-                    document.getElementById('input-github').value = profileData.social.github || '';
-                    document.getElementById('input-linkedin').value = profileData.social.linkedin || '';
-                }
+            const profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+            const profileData = profiles.find(p => p.email === currentUserEmail);
 
-                // Populate project fields
-                if (profileData.projects) {
-                    if (profileData.projects[0]) {
-                        document.getElementById('input-proj1-title').value = profileData.projects[0].title || '';
-                        document.getElementById('input-proj1-desc').value = profileData.projects[0].desc || '';
-                        document.getElementById('input-proj1-link').value = profileData.projects[0].link || '';
-                    }
-                    if (profileData.projects[1]) {
-                        document.getElementById('input-proj2-title').value = profileData.projects[1].title || '';
-                        document.getElementById('input-proj2-desc').value = profileData.projects[1].desc || '';
-                        document.getElementById('input-proj2-link').value = profileData.projects[1].link || '';
-                    }
-                }
+            if (profileData) {
+                 // Populate form fields from localStorage
+                 nameInput.value = profileData.name || '';
+                 roleInput.value = profileData.role || '';
+                 if (profileData.skills) {
+                     skill1Input.value = profileData.skills[0] || '';
+                     skill2Input.value = profileData.skills[1] || '';
+                     skill3Input.value = profileData.skills[2] || '';
+                 }
+                 // Populate social links
+                 if (profileData.social) {
+                     document.getElementById('input-github').value = profileData.social.github || '';
+                     document.getElementById('input-linkedin').value = profileData.social.linkedin || '';
+                 }
+ 
+                 // Populate project fields
+                 if (profileData.projects) {
+                     if (profileData.projects[0]) {
+                         document.getElementById('input-proj1-title').value = profileData.projects[0].title || '';
+                         document.getElementById('input-proj1-desc').value = profileData.projects[0].desc || '';
+                         document.getElementById('input-proj1-link').value = profileData.projects[0].link || '';
+                     }
+                     if (profileData.projects[1]) {
+                         document.getElementById('input-proj2-title').value = profileData.projects[1].title || '';
+                         document.getElementById('input-proj2-desc').value = profileData.projects[1].desc || '';
+                         document.getElementById('input-proj2-link').value = profileData.projects[1].link || '';
+                     }
+                 }
+                 
+                 // Populate account email
+                 document.getElementById('input-account-email').value = profileData.email || '';
 
                 // Set the image source directly
                 if (profileData.image) {
@@ -597,6 +675,11 @@
 
         // Load existing profile when the dashboard is opened
         document.addEventListener('DOMContentLoaded', loadProfile);
+        
+        // Logout cleanup
+        document.querySelector('.logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('currentUser');
+        });
     </script>
 </body>
 </html>

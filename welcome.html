@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to DevForge</title>
+    <style>
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #333 #050505;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        body { 
+            background: linear-gradient(-45deg, #050505, #111111, #0a0a0a, #1a1a1a); 
+            background-size: 400% 400%;
+            color: #fff; 
+            font-family: 'SF Mono', 'Courier New', Courier, monospace; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-container { 
+            background: rgba(255,255,255,0.03); 
+            padding: 40px; 
+            border: 1px solid #222; 
+            border-radius: 8px; 
+            text-align: center; 
+            width: 320px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            opacity: 0; /* Start invisible so the animation can reveal it */
+            animation: fadeUp 1s ease-out forwards;
+        }
+        h1 { letter-spacing: 2px; margin-bottom: 10px; font-weight: normal; }
+        p { color: #888; font-size: 0.85rem; margin-bottom: 30px; }
+        input { 
+            width: 100%; 
+            padding: 12px 10px; 
+            margin-bottom: 15px; 
+            background: transparent; 
+            border: none; 
+            border-bottom: 1px solid #444; 
+            color: #fff; 
+            font-family: inherit; 
+            box-sizing: border-box; 
+            outline: none; 
+            transition: border-color 0.3s; 
+        }
+        input:focus { border-color: #fff; }
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background: #fff; 
+            color: #000; 
+            border: none; 
+            font-family: inherit; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            border-radius: 4px; 
+            transition: all 0.3s ease; 
+        }
+        button:hover { 
+            background: #fff; 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        .toggle { margin-top: 20px; font-size: 0.8rem; color: #666; cursor: pointer; }
+        .toggle span { color: #aaa; border-bottom: 1px dashed #aaa; }
+        .toggle span:hover { color: #fff; border-color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1>DevForge</h1>
+        <p id="subtitle">Welcome to the marketplace</p>
+        <form id="access-form">
+            <button type="submit" id="acc-btn">Enter System</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('access-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Grant viewing access and redirect
+            sessionStorage.setItem('siteAccess', 'granted');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
