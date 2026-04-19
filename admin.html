@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | DevForge</title>
+    <style>
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #333 #050505;
+        }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        body {
+            background-color: #050505;
+            color: #fff;
+            font-family: 'SF Mono', 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+        .header h1 { margin: 0; font-weight: normal; letter-spacing: 2px; }
+        .btn {
+            background: #fff; color: #000; border: none; padding: 10px 20px;
+            cursor: pointer; text-transform: uppercase; font-weight: bold;
+            border-radius: 4px; text-decoration: none; font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #ccc; }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #222;
+            border-radius: 4px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        table {
+            width: 100%; border-collapse: collapse; margin-top: 20px;
+        }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #222; }
+        th { color: #888; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        td { color: #ccc; font-size: 0.95rem; }
+        
+        .btn-danger {
+            background: rgba(255,68,68,0.1); color: #ff4444; padding: 8px 15px;
+            border: 1px solid #ff4444; border-radius: 4px; cursor: pointer;
+            transition: background 0.3s, color 0.3s; font-family: inherit; font-size: 0.8rem;
+        }
+        .btn-danger:hover { background: #ff4444; color: #fff; }
+
+        /* Form Styles */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .form-control { width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.2); border: 1px solid #444; color: #fff; font-family: inherit; border-radius: 4px; box-sizing: border-box; transition: border-color 0.3s; }
+        .form-control:focus { border-color: #fff; outline: none; }
+        .btn-submit { background: #fff; color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px; transition: all 0.3s; margin-top: 10px; }
+        .btn-submit:hover { background: #ccc; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: #fff; color: #000;
+            padding: 12px 25px; border-radius: 4px; font-weight: bold; font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0; pointer-events: none;
+            transform: translateY(20px); transition: all 0.3s;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>System Administration</h1>
+        <a href="index.html" class="btn" id="logout-btn">Logout</a>
+    </div>
+    
+    <div class="card" style="margin-bottom: 30px;">
+        <h2 style="margin-top: 0; font-weight: normal; border-bottom: 1px solid #222; padding-bottom: 15px;">Create New Developer Account</h2>
+        <form id="add-dev-form">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="add-name" class="form-control" placeholder="e.g. Alex Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" id="add-role" class="form-control" placeholder="e.g. Frontend Architect" required>
+                </div>
+                <div class="form-group">
+                    <label>Login Email</label>
+                    <input type="email" id="add-email" class="form-control" placeholder="developer@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Temporary Password</label>
+                    <input type="password" id="add-pass" class="form-control" placeholder="Set an initial password" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Create Account</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top: 0; font-weight: normal; border-bottom: 1px solid #222; padding-bottom: 15px;">Registered Developers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Login Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="dev-list">
+                <!-- Populated via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="admin-toast" class="toast">Action completed successfully.</div>
+
+    <script>
+        // Gatekeeper: Only allow ADMIN session
+        if (sessionStorage.getItem('currentUser') !== 'ADMIN') {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('currentUser');
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('admin-toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function loadDevelopers() {
+            const profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+            const tbody = document.getElementById('dev-list');
+            tbody.innerHTML = '';
+            
+            if (profiles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#666; padding: 30px;">No developers registered yet.</td></tr>';
+                return;
+            }
+
+            profiles.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.name || 'N/A'}</td>
+                    <td>${p.email}</td>
+                    <td>${p.role || 'N/A'}</td>
+                    <td><button class="btn-danger" onclick="deleteDev('${p.email}')">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteDev(email) {
+            if(confirm(`Are you sure you want to delete the developer account for ${email}?`)) {
+                let profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+                profiles = profiles.filter(p => p.email !== email);
+                localStorage.setItem('devForgeProfiles', JSON.stringify(profiles));
+                loadDevelopers(); // Reload the table
+                showToast('Developer account deleted.');
+            }
+        }
+
+        document.getElementById('add-dev-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('add-name').value.trim();
+            const role = document.getElementById('add-role').value.trim();
+            const email = document.getElementById('add-email').value.trim();
+            const pass = document.getElementById('add-pass').value;
+
+            let profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+
+            // Check if email already exists
+            if (profiles.some(p => p.email === email)) {
+                alert('A developer with this email already exists.');
+                return;
+            }
+
+            profiles.push({
+                email: email,
+                password: pass,
+                name: name,
+                role: role,
+                image: `https://i.pravatar.cc/150?u=${encodeURIComponent(email)}`, // Random consistent avatar
+                skills: ['Skill 1', 'Skill 2', 'Skill 3'],
+                social: { github: '', linkedin: '' },
+                projects: [
+                    { title: 'Project 1', desc: 'Description here.', link: '#' },
+                    { title: 'Project 2', desc: 'Description here.', link: '#' }
+                ]
+            });
+
+            localStorage.setItem('devForgeProfiles', JSON.stringify(profiles));
+            document.getElementById('add-dev-form').reset();
+            loadDevelopers();
+            showToast(`Account created for ${name}`);
+        });
+
+        // Initial Load
+        loadDevelopers();
+    </script>
+</body>
+</html>

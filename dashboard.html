@@ -206,6 +206,24 @@
         .btn-save:hover {
             background: #ccc;
         }
+        .btn-danger {
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .btn-danger:hover {
+            background: #ff4444;
+            color: #fff;
+        }
 
         /* Developer Card Styles (Live Preview) */
         .dev-card {
@@ -447,6 +465,7 @@
                     <input type="password" id="input-account-pass" class="form-control" placeholder="Leave blank to keep current password">
                 </div>
                 <button type="button" class="btn-save">Publish to Marketplace</button>
+                <button type="button" class="btn-danger" id="btn-delete">Delete Profile</button>
             </form>
         </section>
 
@@ -532,25 +551,32 @@
             }
 
             let profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
-            const userIndex = profiles.findIndex(p => p.email === currentUserEmail);
-
-            if (userIndex === -1) {
-                alert('Error: Could not find your profile to save.');
-                return;
-            }
-
-            const newEmail = document.getElementById('input-account-email').value || currentUserEmail;
+            
+            // If updating, default to current email if the input is left blank. If setup, don't default.
+            const newEmail = document.getElementById('input-account-email').value || (currentUserEmail !== 'SETUP_MODE' ? currentUserEmail : '');
             const newPass = document.getElementById('input-account-pass').value;
 
-            // Check if they are trying to use an email that's already taken by someone else
-            if (newEmail !== currentUserEmail && profiles.some(p => p.email === newEmail)) {
-                alert('That email is already in use. Please choose another.');
-                return;
+            // Handle Setup Mode Validation
+            if (currentUserEmail === 'SETUP_MODE') {
+                if (!newEmail || !newPass) {
+                    alert('You must provide a Login Email and Password to create your account.');
+                    return;
+                }
+                if (profiles.some(p => p.email === newEmail)) {
+                    alert('That email is already in use. Please choose another.');
+                    return;
+                }
+            } 
+            // Handle Edit Mode Validation
+            else {
+                if (newEmail !== currentUserEmail && profiles.some(p => p.email === newEmail)) {
+                    alert('That email is already in use. Please choose another.');
+                    return;
+                }
             }
 
             const profileData = {
                 email: newEmail, 
-                password: newPass || profiles[userIndex].password,
                 name: nameInput.value,
                 role: roleInput.value,
                 image: document.getElementById('out-image').src,
@@ -577,17 +603,53 @@
                 ]
             };
 
-            // Update the profile in the array
-            profiles[userIndex] = profileData;
-            // Save the entire array back to localStorage
+            // Save logic
+            if (currentUserEmail === 'SETUP_MODE') {
+                profileData.password = newPass;
+                profiles.push(profileData);
+                
+                document.querySelector('.welcome-card h2').textContent = 'Welcome to your Workspace.';
+                document.querySelector('.welcome-card p').textContent = 'Configure your public DevForge marketplace profile below. Changes update in real-time.';
+                showToast('New profile created and published!');
+            } else {
+                const userIndex = profiles.findIndex(p => p.email === currentUserEmail);
+                if (userIndex === -1) {
+                    alert('Error: Could not find your profile to save.');
+                    return;
+                }
+                profileData.password = newPass || profiles[userIndex].password;
+                profiles[userIndex] = profileData;
+                showToast('Profile and credentials updated!');
+            }
+
             localStorage.setItem('devForgeProfiles', JSON.stringify(profiles));
             
-            // Update session in case email changed
+            // Update session and clear password field
             sessionStorage.setItem('currentUser', newEmail);
-            
-            showToast('Profile and credentials updated!');
-            // Clear the password field after saving
             document.getElementById('input-account-pass').value = '';
+        }
+
+        function deleteProfile() {
+            const currentUserEmail = sessionStorage.getItem('currentUser');
+            if (!currentUserEmail) return;
+
+            if (currentUserEmail === 'SETUP_MODE') {
+                alert('You are in Setup Mode. There is no profile to delete yet.');
+                return;
+            }
+
+            if (!confirm("Are you sure you want to permanently delete your profile? This cannot be undone.")) {
+                return;
+            }
+
+            let profiles = JSON.parse(localStorage.getItem('devForgeProfiles')) || [];
+            const updatedProfiles = profiles.filter(p => p.email !== currentUserEmail);
+
+            localStorage.setItem('devForgeProfiles', JSON.stringify(updatedProfiles));
+            sessionStorage.removeItem('currentUser');
+            
+            alert('Profile deleted successfully.');
+            window.location.href = 'welcome.html';
         }
 
         // Toast Notification Function
@@ -610,6 +672,19 @@
             if (!currentUserEmail) {
                 alert('No user logged in. Redirecting to login page.');
                 window.location.href = 'index.html';
+                return;
+            }
+
+            if (currentUserEmail === 'SETUP_MODE') {
+                document.querySelector('.welcome-card h2').textContent = 'Setup New Profile';
+                document.querySelector('.welcome-card p').textContent = 'Create your new developer profile below. Enter your new credentials to publish and claim this account.';
+                document.getElementById('input-account-email').value = '';
+                document.getElementById('input-account-pass').value = '';
+                
+                // Trigger 'input' event on fields to build the live preview correctly
+                [nameInput, roleInput, skill1Input, skill2Input, skill3Input, document.getElementById('input-github'), document.getElementById('input-linkedin')].forEach(input => {
+                    input.dispatchEvent(new Event('input'));
+                });
                 return;
             }
 
@@ -672,6 +747,7 @@
         });
 
         saveButton.addEventListener('click', saveProfile);
+        document.getElementById('btn-delete').addEventListener('click', deleteProfile);
 
         // Load existing profile when the dashboard is opened
         document.addEventListener('DOMContentLoaded', loadProfile);
